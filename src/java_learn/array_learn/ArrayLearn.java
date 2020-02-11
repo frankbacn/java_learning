@@ -9,10 +9,12 @@ public class ArrayLearn {
 		
 		//printArray(arr);
 		//System.out.println("--------------");
-		selectStor_2(arr);
+		//selectStor_2(arr);
 		//bubbleSort(arr);
-		printArray(arr);
-		System.out.println(insertArray(arr,99));
+		//printArray(arr);
+		//System.out.println(insertArray(arr,99));
+		//System.out.println(' ' == ' ');
+		getHex(60);
 	}
 	
 	/**
@@ -176,5 +178,63 @@ public class ArrayLearn {
 	        	break;
 	    }
 	    return mid;
+	}
+	
+	/*
+	 * 获取整数的十六进制表现形式
+	 * */
+	public static void getHex_2(int num) {
+		char[] arr = new char[8];
+		char[] hexchar = {'0','1','2','3',
+				'4','5','6','7',
+				'8','9','A','B',
+				'C','D','E','F'};
+		int index = 7;
+		while(num!=0) {
+			arr[index--] = hexchar[num&15];
+			num = num >>> 4;
+			//index--;
+		}
+		for(int x = index+1; x<arr.length; x++) {
+			if(x==arr.length-1)
+				System.out.println(arr[x]);
+			else
+				System.out.print(arr[x]);
+		}
+	}
+	
+	//十进制转换十六进制
+	public static void getHex(int num) {
+		trans(num, 4, 15);
+	}
+	//十进制转换二进制
+	public static void getBin(int num) {
+		trans(num, 1, 1);
+	}
+	//十进制转换八进制
+	public static void getOtc(int num) {
+		trans(num, 3, 7);
+	}
+	
+	
+	//进制转换功能
+	public static void trans(int num,int offset,int base) {
+		char[] arr = new char[32];
+		char[] hexchar = {'0','1','2','3',
+				'4','5','6','7',
+				'8','9','A','B',
+				'C','D','E','F'};
+		int index = arr.length;
+		while(num!=0) {
+			arr[index--] = hexchar[num&base];
+			num = num >>> offset;
+			//index--;
+		}
+		for(int x = index+1; x<arr.length; x++) {
+			if(x==arr.length-1)
+				System.out.println(arr[x]);
+			else
+				System.out.print(arr[x]);
+		}
 	}
 }
