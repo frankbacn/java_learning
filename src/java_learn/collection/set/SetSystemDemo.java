@@ -1,4 +1,4 @@
-package java_learn.collection.list;
+package java_learn.collection.set;
 
 import java.util.HashSet;
 import java.util.Iterator;
