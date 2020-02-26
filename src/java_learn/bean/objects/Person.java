@@ -1,6 +1,6 @@
 package java_learn.bean.objects;
 
-public class Person {
+public class Person implements Comparable{
 
 	private String name;
     private int age;
@@ -49,8 +49,26 @@ public class Person {
 		        return true;
 		    if(!(obj instanceof Person))
 		        throw new ClassCastException("类型错误");
-		        
-		    return (this.name.equals(((Person)obj).getName())) && (this.age == ((Person)obj).getAge());
+		    Person p = (Person)obj;
+		    return (this.name.equals(p.name)) && (this.age == p.age);
+		}
+
+		@Override
+		public int compareTo(Object o) {
+			//以年龄作为对象大小的比较方式
+			//年龄相等再比较姓名的字典顺序
+			if(!(o instanceof Person))
+		        throw new ClassCastException("类型错误");
+		    Person p = (Person)o;
+		    if(this.age == p.age)
+		        return name.compareTo(p.name);
+		    else
+		        return this.age - p.age;
+		    
+		    /*老师的代码
+		    int temp = age - p.age;
+		    return temp == 0? name.compareTo(p.name):temp;
+		    */
 		}
     
 }
