@@ -2,11 +2,13 @@ package java_learn.IO.bytestream;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class ByteStreamDemo {
 
@@ -15,7 +17,21 @@ public class ByteStreamDemo {
 		//copyFile();
 //		cppyFileBuffered();
 //		keybroadRead();
-		keybroadRead2();
+//		keybroadRead2();
+		keybroadReadByLine();
+	}
+
+	private static void keybroadReadByLine() throws IOException {
+		BufferedReader bri = new BufferedReader(new InputStreamReader(System.in));
+		
+		String str = null;
+		
+		while((str = bri.readLine())!=null){
+			if(str.equals("over")){
+				break;
+			}
+			System.out.println(str.toUpperCase());
+		}
 	}
 
 	private static void keybroadRead2() throws IOException {
