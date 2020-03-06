@@ -1,20 +1,17 @@
 package java_learn.IO.bytestream;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Properties;
+import java.util.Set;
 
 public class FileSplitAndMerge {
 
@@ -36,25 +33,31 @@ public class FileSplitAndMerge {
 			throw new RuntimeException("给定目录不存在");
 		if(!dir.isDirectory())
 			throw new RuntimeException("给定目录非法");
-		File[] files = dir.listFiles(new FileFilter() {
-			/*匿名内部类实现文件过滤器。
-			 * 根据文件后缀名获取目录中的文件
-			 */
-			@Override
-			public boolean accept(File pathname) {
-				return pathname.getName().endsWith(".split");
-			}
-		});
-		String filename = files[0].getName().substring(0, files[0].getName().indexOf(".split")-1); //获取合并后的文件名
-		File dst_file = new File(dir,filename); //将目标文件封装成对象
+		File config_file = new File(dir,"parts.properties");
+		if(!config_file.exists())
+			throw new RuntimeException("配置文件不存在");
+		Properties p = new Properties();
 		SequenceInputStream sis = null;
 		BufferedOutputStream bfw = null;
 		try{
+			p.load(new FileInputStream(config_file));
+			Set<String> keys = p.stringPropertyNames();
 			ArrayList<FileInputStream> al = new ArrayList<FileInputStream>();
-			//创建结合容器存储多个分割文件流对象
-			for(File f:files){
-				al.add(new FileInputStream(f));
+			String filename = null;
+			
+			for(String key:keys){
+				if(key.equals("sourcefile")){
+					filename=p.getProperty(key);
+				}else{
+					File partfile = new File(dir,p.getProperty(key));
+					if(!partfile.exists())
+						throw new RuntimeException("分片文件"+p.getProperty(key)+"不存在");
+					al.add(new FileInputStream(partfile));
+				}
 			}
+			
+			File dst_file = new File(dir,filename); //将目标文件封装成对象
+			
 			
 			Enumeration<FileInputStream> en = Collections.enumeration(al); //将流容器转换为Enumeration集合对象
 		
@@ -64,7 +67,7 @@ public class FileSplitAndMerge {
 			
 			int len = 0;
 			while((len = sis.read(buff))!=-1){ //读取输入并循环写入文件
-				bfw.write(buff);
+				bfw.write(buff,0,len);
 				bfw.flush();
 			}
 		}catch(IOException e){
@@ -87,6 +90,17 @@ public class FileSplitAndMerge {
 		}
 		
 	}
+//	public static void fileFilter(File dir) {
+//		File[] files = dir.listFiles(new FileFilter() {
+//			/*匿名内部类实现文件过滤器。
+//			 * 根据文件后缀名获取目录中的文件
+//			 */
+//			@Override
+//			public boolean accept(File pathname) {
+//				return pathname.getName().endsWith(".split");
+//			}
+//		});
+//	}
 	/**
 	 * 分割文件
 	 * 将给定的文件对象按照指定大小分割成多份，
@@ -105,6 +119,8 @@ public class FileSplitAndMerge {
 		if(!dir.isDirectory()){
 			throw new RuntimeException("给定目录非法");
 		}
+		Properties p = new Properties();
+		p.setProperty("sourcefile", f.getName());
 		byte[] buff = new byte[size];
 		int len = 0;
 		int times = 1;
@@ -112,8 +128,11 @@ public class FileSplitAndMerge {
 		try{
 			in = new FileInputStream(f);
 			while((len = in.read(buff))!=-1){
-				times = fileWrite(f, dir, buff, len, times);
+				String filename = fileWrite(f, dir, buff, len, times);
+				p.setProperty("part"+times, filename);
+				times++;
 			}
+			p.store(new FileOutputStream(new File(dir,"parts.properties")), "");
 		}catch(FileNotFoundException e){
 			throw new RuntimeException("写入文件失败");
 		}
@@ -140,15 +159,16 @@ public class FileSplitAndMerge {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	private static int fileWrite(File f, File dir, byte[] buff, int len, int times)
+	private static String fileWrite(File f, File dir, byte[] buff, int len, int times)
 			throws FileNotFoundException, IOException {
 		File sfile = new File(dir,f.getName()+times+".split"); //定义分割文件
+		String sfilename = sfile.getName();
 		BufferedOutputStream bfo=new BufferedOutputStream(new FileOutputStream(sfile)); //创建输出流
 		bfo.write(buff,0,len); //写入文件
 		bfo.flush();
 		times++; //文件编号自增
 		bfo.close(); //关闭输出流
-		return times;
+		return sfilename;
 	}
 
 }
